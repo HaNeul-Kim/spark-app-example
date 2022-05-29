@@ -1,6 +1,8 @@
 package com.tistory.hskimsky
 
+import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.util.LongAccumulator
 import org.slf4j.LoggerFactory
 
 /**
@@ -14,8 +16,14 @@ object ExampleJob {
   def main(args: Array[String]): Unit = {
     val Array(userId, now, query) = args
     logger.info(s"userId = ${userId}, now = ${now}, query = ${query}")
+    /*
+    spark-shell \
+     --conf spark.hadoop.fs.s3a.endpoint=https://HOSTNAME \
+     --conf spark.hadoop.fs.s3a.access.key=AWS_ACCESS_KEY_ID \
+     --conf spark.hadoop.fs.s3a.secret.key=AWS_SECRET_ACCESS_KEY
+    */
     val spark: SparkSession = SparkSession.builder().enableHiveSupport().getOrCreate()
-    // val sc: SparkContext = spark.sparkContext
+    val sc: SparkContext = spark.sparkContext
 
     // val count: Long = sc.textFile(inputPath.toString).count()
     // logger.info(s"count = ${count}")
@@ -25,7 +33,8 @@ object ExampleJob {
       option("query", query).
       option("driver", "org.apache.calcite.jdbc.KuduDriver").
       load
-
+    val countAccumulator: LongAccumulator = sc.longAccumulator("all counter")
+    df.rdd.foreach(_ => countAccumulator.add(1))
     df.write.format("csv").save(s"/tmp/${userId}/${now}")
 
     spark.stop()

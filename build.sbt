@@ -14,10 +14,13 @@ libraryDependencies ++= Seq(
 
   , "org.apache.spark" %% "spark-core" % "2.4.7" % Provided
   , "org.apache.spark" %% "spark-sql" % "2.4.7" % Provided
+
+  , "org.apache.hadoop" % "hadoop-client" % "3.1.1" % Provided
+  , "org.apache.hadoop" % "hadoop-aws" % "3.1.1" % Provided
 )
 
 lazy val root = (project in file(".")).settings(
-  name := "calcite-kudu-spark-jdbc-test"
+  name := "spark-app-example"
   , idePackagePrefix := Some("com.tistory.hskimsky")
   , assembly / mainClass := Some("com.tistory.hskimsky.ExampleJob")
   , assembly / assemblyJarName := "spark-app-example.jar"
