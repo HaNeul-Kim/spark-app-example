@@ -49,6 +49,28 @@ class ExampleTest {
     conf.iterator().asScala.toSeq.sortWith((a, b) => a.getKey.compareTo(b.getKey) < 0).foreach(e => println((e.getKey, e.getValue)))
   }
 
+@Test
+def s3r2connect(): Unit = {
+  val conf = new Configuration()
+  // conf.addResource(this.getClass.getResourceAsStream("/s3-site.xml"))
+  conf.setInt("fs.s3a.paging.maximum", 1000)// S3AFileSystem 의 default value 가 5000 인데 aws sdk
+  conf.set(s"fs.s3a.bucket.${S3_TEST_BUCKET}.endpoint", S3_ENDPOINT_URL)
+  conf.set(s"fs.s3a.bucket.${S3_TEST_BUCKET}.access.key", S3_ACCESS_KEY_ID)
+  conf.set(s"fs.s3a.bucket.${S3_TEST_BUCKET}.secret.key", S3_SECRET_KEY_ID)
+  conf.set(s"fs.s3a.bucket.${R2_TEST_BUCKET}.endpoint", R2_ENDPOINT_URL)
+  conf.set(s"fs.s3a.bucket.${R2_TEST_BUCKET}.access.key", R2_ACCESS_KEY_ID)
+  conf.set(s"fs.s3a.bucket.${R2_TEST_BUCKET}.secret.key", R2_SECRET_KEY_ID)
+
+  val r2Path = new Path(s"s3a://${R2_TEST_BUCKET}/*")
+  r2Path.getFileSystem(conf).globStatus(r2Path).foreach(status => {
+    logger.info(s"status = ${status}")
+  })
+  val s3Path = new Path(s"s3a://${S3_TEST_BUCKET}/*")
+  s3Path.getFileSystem(conf).globStatus(s3Path).foreach(status => {
+    logger.info(s"status = ${status}")
+  })
+}
+
   @Test
   def s3BucketAclTest(): Unit = {
     val region: Region = Region.US_West_2
